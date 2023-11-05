@@ -3,9 +3,3 @@
 sudo apt install git-lfs
 git lfs clone git@github.com:LouisLoufy/CodeTest_Hw.git
 ```
-
-## build
-``` bash
-mkdir build && cd build
-cmake .. && make -j16
-```
