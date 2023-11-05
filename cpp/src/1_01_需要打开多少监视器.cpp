@@ -1,3 +1,4 @@
+#include <cassert>
 #include <iostream>
 #include <vector>
 
@@ -5,7 +6,7 @@ using namespace std;
 
 vector<vector<int>> offsets = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // 上下左右四个方向的偏移量
 
-int Caculate(int &m, int &n, vector<vector<int>> &matrix) {
+int numOfMonitors(int &m, int &n, vector<vector<int>> &matrix) {
     int count = 0; // 记录需要打开的监控器数量
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
@@ -34,12 +35,47 @@ int Caculate(int &m, int &n, vector<vector<int>> &matrix) {
     return count;
 }
 
-int main() {
-    int m, n; // 输入长宽
-    cout << "Enter: " << endl;
-    cin >> m >> n;
-    vector<vector<int>> matrix(m, vector<int>(n));
+void test() {
+    {
+        int                 m = 0, n = 0;
+        vector<vector<int>> matrix;
+        assert(numOfMonitors(m, n, matrix) == 0);
+    }
 
+    {
+        int                 m = 2, n = 3;
+        vector<vector<int>> matrix = {{0, 0, 0}, {0, 0, 0}};
+        assert(numOfMonitors(m, n, matrix) == 0);
+    }
+
+    {
+        int                 m = 2, n = 2;
+        vector<vector<int>> matrix = {{1, 1}, {1, 1}};
+        assert(numOfMonitors(m, n, matrix) == 4);
+    }
+
+    {
+        int                 m = 3, n = 3;
+        vector<vector<int>> matrix = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+        assert(numOfMonitors(m, n, matrix) == 5);
+    }
+
+    cout << "All test cases passed!" << endl;
+}
+
+int main() {
+    test();
+
+    int m, n; // 输入长宽
+
+    cout << "Enter the length and width of the parking lot: " << endl;
+    cin >> m >> n;
+
+    if (m != 0 && n != 0) {
+        cout << "Enter the distribution of parking lot cars: " << endl;
+    }
+
+    vector<vector<int>> matrix(m, vector<int>(n)); // 停车场分布
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < n; ++j) {
             cin >> matrix[i][j];
@@ -47,6 +83,7 @@ int main() {
     }
 
     // 输出结果打印
-    cout << "result: " << Caculate(m, n, matrix) << endl;
+    cout << "result: " << numOfMonitors(m, n, matrix) << endl;
+
     return 0;
 }

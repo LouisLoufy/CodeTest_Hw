@@ -1,62 +1,97 @@
 #include <algorithm>
+#include <cassert>
 #include <iostream>
-#include <map>
-#include <set>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
 
-map<string, set<string>> suppressMap;
-
-void dfs(const string &id, set<string> &suppressedIds) {
-    if (suppressMap.count(id) > 0) {
-        for (const auto &suppressed : suppressMap[id]) {
-            if (suppressedIds.count(suppressed) == 0) {
-                suppressedIds.insert(suppressed);
-                dfs(suppressed, suppressedIds);
-            }
+vector<string> realAlerts(int N, unordered_map<string, vector<string>> relations, vector<string> alertList) {
+    unordered_set<string> restrained;
+    for (auto rel : relations) {
+        if (find(alertList.begin(), alertList.end(), rel.first) != alertList.end()) {
+            restrained.insert(rel.second.begin(), rel.second.end());
         }
     }
+
+    vector<string> realAlerts;
+    for (auto alert : alertList) {
+        if (restrained.find(alert) == restrained.end()) {
+            realAlerts.push_back(alert);
+        }
+    }
+
+    return realAlerts;
+}
+
+unordered_map<string, vector<string>> getRelations(int n, vector<pair<string, string>> suppressRelations) {
+    unordered_map<string, vector<string>> relations;
+    for (int i = 0; i < n; i++) {
+        string id1 = suppressRelations[i].first;
+        string id2 = suppressRelations[i].second;
+        relations[id1].push_back(id2);
+    }
+    return relations;
+}
+
+void test() {
+    {
+        int                                   n                 = 1;
+        vector<pair<string, string>>          suppressRelations = {{"A", "B"}};
+        vector<string>                        alertList         = {"A", "B"};
+        unordered_map<string, vector<string>> relations         = getRelations(n, suppressRelations);
+        vector<string>                        output            = realAlerts(1, relations, alertList);
+
+        assert(output.size() == 1);
+        assert(output[0] == "A");
+    }
+
+    {
+        int                                   n                 = 2;
+        vector<pair<string, string>>          suppressRelations = {{"A", "B"}, {"C", "D"}};
+        vector<string>                        alertList         = {"A", "B", "C", "D"};
+        unordered_map<string, vector<string>> relations         = getRelations(n, suppressRelations);
+        vector<string>                        output            = realAlerts(2, relations, alertList);
+        assert(output.size() == 2);
+        assert(std::find(output.begin(), output.end(), "A") != output.end());
+        assert(std::find(output.begin(), output.end(), "C") != output.end());
+    }
+
+    cout << "All test cases passed!" << endl;
 }
 
 int main() {
-    int N;
+    test();
 
-    cout << "Enter the number of suppress relations:";
+    int N;
+    cout << "Enter the number of suppress relations:" << endl;
     cin >> N;
+
+    unordered_map<string, vector<string>> relations;
+    cout << "Enter the suppress relations:" << endl;
     for (int i = 0; i < N; i++) {
         string id1, id2;
         cin >> id1 >> id2;
-        suppressMap[id1].insert(id2);
+        relations[id1].push_back(id2);
     }
 
-    // Compute transitive closure
-    for (auto &relation : suppressMap) {
-        dfs(relation.first, relation.second);
-    }
-
-    cout << "Enter the list of alerts, end with 'end':";
+    string         alert;
     vector<string> alertList;
-    string              alert;
-    while (cin >> alert && alert != "end") {
+    cout << "Enter the list of alerts" << endl;
+    while (cin >> alert) {
         alertList.push_back(alert);
-    }
-
-    // Removing suppressed alerts
-    for (const auto &relation : suppressMap) {
-        alertList.erase(remove(alertList.begin(), alertList.end(), relation.first), alertList.end());
-        for (const auto &suppressed : relation.second) {
-            alertList.erase(remove(alertList.begin(), alertList.end(), suppressed), alertList.end());
+        if (cin.get() == '\n') {
+            break;
         }
     }
 
-    cout << "Real alerts list:";
-    for (const auto &alert : alertList) {
-        cout << " " << alert;
+    cout << "Real alerts list:" << endl;
+    for (auto realAlert : realAlerts(N, relations, alertList)) {
+        cout << realAlert << " ";
     }
-    
-    cout <<  endl;
+    cout << endl;
 
     return 0;
 }
