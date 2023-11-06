@@ -50,13 +50,14 @@ void test() {
 
     {
         int                                   n                 = 2;
-        vector<pair<string, string>>          suppressRelations = {{"A", "B"}, {"C", "D"}};
-        vector<string>                        alertList         = {"A", "B", "C", "D"};
+        vector<pair<string, string>>          suppressRelations = {{"A", "B"}, {"B", "C"}};
+        vector<string>                        alertList         = {"A", "B", "C", "D", "E"};
         unordered_map<string, vector<string>> relations         = getRelations(n, suppressRelations);
         vector<string>                        output            = realAlerts(2, relations, alertList);
-        assert(output.size() == 2);
-        assert(std::find(output.begin(), output.end(), "A") != output.end());
-        assert(std::find(output.begin(), output.end(), "C") != output.end());
+        assert(output.size() == 3);
+        assert(find(output.begin(), output.end(), "A") != output.end());
+        assert(find(output.begin(), output.end(), "D") != output.end());
+        assert(find(output.begin(), output.end(), "E") != output.end());
     }
 
     cout << "All test cases passed!" << endl;
