@@ -15,7 +15,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 foreach(SOURCE_FILE ${SOURCE_FILES})
     get_filename_component(FILE_NAME ${SOURCE_FILE} NAME_WE)
 
-    string(REGEX MATCH "^[0-9]+_[0-9]+" FILE_NAME ${FILE_NAME})
+    string(REGEX MATCH "^[A-Z][0-9]+_[0-9]+" FILE_NAME ${FILE_NAME})
 
     add_executable(${FILE_NAME} ${SOURCE_FILE})
 endforeach()
