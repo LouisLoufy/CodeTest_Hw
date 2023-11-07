@@ -1,1 +1,6 @@
-B卷-新加题-100分/*.png filter=lfs diff=lfs merge=lfs -text
+A卷-100分/*.png filter=lfs diff=lfs merge=lfs -text
+A卷-200分/*.png filter=lfs diff=lfs merge=lfs -text
+B卷-100分/*.png filter=lfs diff=lfs merge=lfs -text
+B卷-200分/*.png filter=lfs diff=lfs merge=lfs -text
+C卷-100分/*.png filter=lfs diff=lfs merge=lfs -text
+C卷-200分/*.png filter=lfs diff=lfs merge=lfs -text
