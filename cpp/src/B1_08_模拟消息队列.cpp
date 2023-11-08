@@ -1,3 +1,5 @@
+#include "dbg.h"
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -31,13 +33,15 @@ vector<vector<int>> getResult(vector<int> &pubArr, vector<int> &subArr) {
     }
 
     sort(publisher.begin(), publisher.end());
+    // dbg(publisher);
 
     vector<vector<int>> subContent(subscriber.size());
 
     for (auto &pub : publisher) {
-        for (int j = subscriber.size() - 1; j >= 0; --j) {
+        for (int j = subscriber.size() - 1; j >= 0; --j) { // 优先发给后面的消费者，倒序
             if (pub[0] >= subscriber[j][0] && pub[0] < subscriber[j][1]) {
                 subContent[j].emplace_back(pub[1]);
+                // dbg(subContent);
                 break;
             }
         }
