@@ -12,10 +12,9 @@ public:
     TreeNode                         *father;
     unordered_map<string, TreeNode *> children;
 
-    TreeNode(string curDicName, TreeNode *father) {
-        this->curDicName = curDicName;
-        this->father     = father;
-    }
+    TreeNode(string curDicName, TreeNode *father)
+        : curDicName(curDicName)
+        , father(father) {}
 };
 
 class Tree {
@@ -24,36 +23,38 @@ public:
     TreeNode *cur;
 
     Tree() {
-        this->root = new TreeNode("/", nullptr);
-        this->cur  = root;
+        root = new TreeNode("/", nullptr);
+        cur  = root;
     }
 
-    void mkdir(string childDicName) {
-        this->cur->children.emplace(childDicName, new TreeNode(childDicName + "/", this->cur));
+    void mkdir(const string &childDicName) {
+        if (cur->children.find(childDicName) == cur->children.end()) {
+            cur->children[childDicName] = new TreeNode(childDicName + "/", cur);
+        }
     }
 
-    void cd(string dicName) {
+    void cd(const string &dicName) {
         if (dicName == "..") {
-            if (this->cur->father != nullptr) {
-                this->cur = this->cur->father;
+            if (cur->father != nullptr) {
+                cur = cur->father;
             }
         } else {
-            if (this->cur->children.find(dicName) != this->cur->children.end()) {
-                this->cur = this->cur->children[dicName];
+            if (cur->children.find(dicName) != cur->children.end()) {
+                cur = cur->children[dicName];
             }
         }
     }
 
     string pwd() {
-        stack<TreeNode *> pathStack;
-        TreeNode         *curNode = this->cur;
-        while (curNode != nullptr) {
-            pathStack.push(curNode);
-            curNode = curNode->father;
+        stack<string> pathStack;
+        TreeNode     *node = cur;
+        while (node != nullptr) {
+            pathStack.push(node->curDicName);
+            node = node->father;
         }
         string path;
         while (!pathStack.empty()) {
-            path += pathStack.top()->curDicName;
+            path += pathStack.top();
             pathStack.pop();
         }
         return path;
@@ -87,7 +88,6 @@ int main() {
             if (!cmd_val.empty()) {
                 continue;
             }
-
             lastCommandOutput = tree.pwd();
         } else if (cmd_key == "mkdir" || cmd_key == "cd") {
             if (cmd_val.empty()) {
