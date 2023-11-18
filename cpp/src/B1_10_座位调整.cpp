@@ -14,10 +14,10 @@ int getResult(vector<int> &desk) {
 
     for (int i = 0; i < n; ++i) {
         if (desk[i] == 0) {
-            dbg(i, desk);
+            // dbg(i, desk);
             if ((i == 0 || desk[i - 1] == 0) && (i == n - 1 || desk[i + 1] == 0)) {
                 ++num;
-                dbg(i, desk);
+                // dbg(i, desk);
                 desk[i] = 1;
             }
         }
@@ -51,7 +51,7 @@ void test() {
 }
 
 int main() {
-    // test();
+    test();
 
     string line;
     getline(cin, line);
