@@ -1,69 +1,129 @@
 #include "dbg.h"
 
 #include <iostream>
+#include <memory>
 #include <stack>
 #include <unordered_map>
 
 using namespace std;
 
-class TreeNode {
+class Directory {
 public:
-    string                            curDicName;
-    TreeNode                         *father;
-    unordered_map<string, TreeNode *> children;
+    Directory() = default;
+    Directory(const string &name, const shared_ptr<Directory> &parent = nullptr)
+        : name(name)
+        , parent(parent) {}
 
-    TreeNode(string curDicName, TreeNode *father)
-        : curDicName(curDicName)
-        , father(father) {}
+public:
+    string                                       name;
+    unordered_map<string, shared_ptr<Directory>> children;
+    weak_ptr<Directory>                          parent;
 };
 
-class Tree {
+class FileSystem {
 public:
-    TreeNode *root;
-    TreeNode *cur;
-
-    Tree() {
-        root = new TreeNode("/", nullptr);
-        cur  = root;
+    FileSystem() {
+        root       = make_shared<Directory>("/");
+        currentDir = root;
     }
 
-    void mkdir(const string &childDicName) {
-        if (cur->children.find(childDicName) == cur->children.end()) {
-            cur->children[childDicName] = new TreeNode(childDicName + "/", cur);
+    void mkdir(const string &dirName) {
+        auto it = currentDir->children.find(dirName);
+        if (it == currentDir->children.end()) {
+            auto newDir                   = make_shared<Directory>(dirName, currentDir);
+            currentDir->children[dirName] = newDir;
         }
     }
 
-    void cd(const string &dicName) {
-        if (dicName == "..") {
-            if (cur->father != nullptr) {
-                cur = cur->father;
+    void cd(const string &dirName) {
+        if (dirName == "..") {
+            auto parent = currentDir->parent.lock();
+            if (parent) {
+                currentDir = parent;
             }
         } else {
-            if (cur->children.find(dicName) != cur->children.end()) {
-                cur = cur->children[dicName];
+            auto it = currentDir->children.find(dirName);
+            if (it != currentDir->children.end()) {
+                currentDir = it->second;
             }
         }
     }
 
     string pwd() {
-        stack<string> pathStack;
-        TreeNode     *node = cur;
+        stack<string>         pathStack;
+        shared_ptr<Directory> node = currentDir;
         while (node != nullptr) {
-            pathStack.push(node->curDicName);
-            node = node->father;
+            if (!node->name.empty()) {
+                pathStack.push(node->name);
+            }
+            node = node->parent.lock();
         }
         string path;
         while (!pathStack.empty()) {
+            if (!path.empty() &&
+                !pathStack.top().empty()) {
+                path += "/";
+            }
             path += pathStack.top();
             pathStack.pop();
         }
         return path;
     }
+
+private:
+    shared_ptr<Directory> root;
+    shared_ptr<Directory> currentDir;
 };
 
+bool validateDirectory(const string &dirName) {
+    for (char c : dirName) {
+        if (!isalpha(c)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void executeCommand(FileSystem &fs, const string &cmdKey, const string &cmdVal, string &lastCommandOutput) {
+    if (cmdKey == "pwd") {
+        if (!cmdVal.empty()) {
+            return;
+        }
+        lastCommandOutput = fs.pwd();
+    } else if (cmdKey == "mkdir") {
+        if (cmdVal.empty() || !validateDirectory(cmdVal)) {
+            return;
+        }
+        fs.mkdir(cmdVal);
+        lastCommandOutput = "";
+    } else if (cmdKey == "cd") {
+        if (cmdVal.empty() || !validateDirectory(cmdVal)) {
+            return;
+        }
+        fs.cd(cmdVal);
+        lastCommandOutput = "";
+    }
+}
+
+void processCommand(FileSystem &fs, const string &line, string &lastCommandOutput) {
+    string cmdKey;
+    string cmdVal;
+
+    size_t spacePos = line.find(' ');
+    if (spacePos != string::npos) {
+        cmdKey = line.substr(0, spacePos);
+        cmdVal = line.substr(spacePos + 1);
+        dbg(cmdKey, cmdVal);
+    } else {
+        cmdKey = line;
+    }
+
+    executeCommand(fs, cmdKey, cmdVal, lastCommandOutput);
+}
+
 int main() {
-    Tree   tree;
-    string lastCommandOutput = "";
+    FileSystem fs;
+    string     lastCommandOutput = "";
 
     while (true) {
         string line;
@@ -72,48 +132,7 @@ int main() {
         if (line.empty()) {
             break;
         }
-
-        string cmd_key;
-        string cmd_val;
-
-        size_t spacePos = line.find(' ');
-        if (spacePos != string::npos) {
-            cmd_key = line.substr(0, spacePos);
-            cmd_val = line.substr(spacePos + 1);
-        } else {
-            cmd_key = line;
-        }
-
-        if (cmd_key == "pwd") {
-            if (!cmd_val.empty()) {
-                continue;
-            }
-            lastCommandOutput = tree.pwd();
-        } else if (cmd_key == "mkdir" || cmd_key == "cd") {
-            if (cmd_val.empty()) {
-                continue;
-            }
-
-            bool isValidDirectory = true;
-            for (char c : cmd_val) {
-                if (c < 'a' || c > 'z') {
-                    isValidDirectory = false;
-                    break;
-                }
-            }
-
-            if (!isValidDirectory) {
-                continue;
-            }
-
-            if (cmd_key == "mkdir") {
-                tree.mkdir(cmd_val);
-                lastCommandOutput = "";
-            } else {
-                tree.cd(cmd_val);
-                lastCommandOutput = "";
-            }
-        }
+        processCommand(fs, line, lastCommandOutput);
     }
 
     cout << lastCommandOutput << endl;
