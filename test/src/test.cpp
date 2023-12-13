@@ -1,47 +1,74 @@
+#include "dbg.h"
+
 #include <iostream>
-#include <queue>
 #include <string>
+#include <thread>
 
-std::string result(std::string post, std::string mid) {
-    if (post.empty() || mid.empty()) {
-        return ""; // 处理空序列的情况
-    }
+void const_pointer_vs_pointer_to_const() {
+    int x = 0;
+    int y = 0;
 
-    std::queue<std::pair<std::string, std::string>> queue;
-    std::string ans;
-
-    queue.push({post, mid});
-
-    while (!queue.empty()) {
-        std::string postSubtree = queue.front().first;
-        std::string midSubtree = queue.front().second;
-        queue.pop();
-
-        char root = postSubtree.back();
-        ans.push_back(root);
-
-        size_t rootIdx = midSubtree.find(root);
-        std::string leftPost, leftMid, rightPost, rightMid;
-
-        if (rootIdx != 0 && rootIdx != std::string::npos) {
-            leftPost = postSubtree.substr(0, rootIdx);
-            leftMid = midSubtree.substr(0, rootIdx);
-            queue.push({leftPost, leftMid});
-        }
-
-        if (rootIdx != midSubtree.size() - 1 && rootIdx != std::string::npos) {
-            rightPost = postSubtree.substr(rootIdx, postSubtree.size() - rootIdx - 1);
-            rightMid = midSubtree.substr(rootIdx + 1);
-            queue.push({rightPost, rightMid});
-        }
-    }
-
-    return ans;
+    const int *ptr1 = &x;
+    int const *ptr2 = &x;
+    int *const ptr3 = &x;
 }
 
 int main() {
-    std::string post, mid;
-    std::cin >> post >> mid;
-    std::cout << result(post, mid) << std::endl;
+
     return 0;
 }
+
+// #include <vector>
+// #include "dbg.h"
+
+// class Solution {
+// public:
+//     void merge(std::vector<int>& nums1, int m, std::vector<int>& nums2, int n) {
+//         std::vector<int> nums;
+//         std::vector<int> nums1_new(nums1.begin(), nums1.begin() + m);
+//         dbg(nums, nums1_new);
+
+//         for (int i = 0; i < nums1.size(); i++) {
+//             if (nums1_new.empty()) {
+//                 nums.insert(nums.end(), nums2.begin(), nums2.end());
+//                 dbg(nums, nums1_new);
+//                 break;
+//             } else if (nums2.empty()) {
+//                 nums.insert(nums.end(), nums1_new.begin(), nums1_new.end());
+//                 dbg(nums, nums1_new);
+//                 break;
+//             }
+
+//             if (nums1_new[0] < nums2[0]) {
+//                 nums.push_back(nums1_new[0]);
+//                 nums1_new.erase(nums1_new.begin());
+//                 dbg(nums, nums1_new);
+//             } else {
+//                 nums.push_back(nums2[0]);
+//                 nums2.erase(nums2.begin());
+//                 dbg(nums, nums1_new);
+//             }
+//         }
+
+//         nums1 = nums;
+//     }
+// };
+
+// int main() {
+//     Solution solution;
+
+//     std::vector<int> nums1 = {1, 2, 3, 0, 0, 0};
+//     int m = 3;
+//     std::vector<int> nums2 = {2, 5, 6, 0, 0, 0};
+//     int n = 3;
+
+//     solution.merge(nums1, m, nums2, n);
+
+//     for (int num : nums1) {
+//         std::cout << num << " ";
+//     }
+
+//     std::cout << std::endl;
+
+//     return 0;
+// }
