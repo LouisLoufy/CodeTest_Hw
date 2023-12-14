@@ -17,6 +17,9 @@ struct Node {
 
 // 构建Huffman树
 std::shared_ptr<Node> huffman_tree(const std::vector<int> &data) {
+    if (data.empty()) {
+        return {};
+    }
     std::vector<std::shared_ptr<Node>> nodes;
     for (int weight : data) {
         nodes.push_back(std::make_shared<Node>(weight));
@@ -81,18 +84,12 @@ void test() {
         std::vector<int> expected = {3, 8, 5, 19, 11, 42, 23, 100, 29, 58, 14, 29, 7, 15, 8};
         assert(result == expected);
     }
+
+    std::cout << "test passed\n";
 }
 
 int main() {
-    // test();
-    /**
-     * @bug
-     * Program received signal SIGSEGV, Segmentation fault.
-     * 0x000055555555790f in std::_Tuple_impl<0ul, Node*, std::default_delete<Node> >::_Tuple_impl (this=0x7fffffffdac8) at /usr/include/c++/11/tuple:301
-     * 301           _Tuple_impl(_Tuple_impl&&) = default;
-     * A debugging session is active.
-     * Inferior 1 [process 13313] will be killed.
-    */
+    test();
 
     int n;
     std::cin >> n;
