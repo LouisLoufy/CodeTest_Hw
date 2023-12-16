@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(Problems)
 
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(utils)
@@ -10,7 +11,7 @@ add_definitions(-DDBG_MACRO_NO_WARNING)
 
 # 设置调试相关的编译选项
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fsanitize=leak -fsanitize-recover=all -fno-omit-frame-pointer -g")
 
 file(GLOB SOURCE_FILES "src/*.cpp")
 

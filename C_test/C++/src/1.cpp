@@ -20,6 +20,7 @@ std::shared_ptr<Node> huffman_tree(const std::vector<int> &data) {
     if (data.empty()) {
         return {};
     }
+
     std::vector<std::shared_ptr<Node>> nodes;
     for (int weight : data) {
         nodes.push_back(std::make_shared<Node>(weight));

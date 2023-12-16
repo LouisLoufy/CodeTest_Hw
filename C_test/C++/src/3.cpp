@@ -1,79 +1,115 @@
-#include <algorithm>
-#include <deque>
+#include <cassert>
 #include <iostream>
-#include <vector>
+#include <queue>
+#include <sstream>
+#include <unordered_map>
 
-using namespace std;
-
-// 定义了一个 TreeNode 结构体，表示二叉树的节点
 struct TreeNode {
-    int       val;   // 值
-    TreeNode *left;  // 左子节点
-    TreeNode *right; // 右子节点
+    char      val;
+    TreeNode *left;
+    TreeNode *right;
 
-    TreeNode(int x)
+    TreeNode(char x)
         : val(x)
         , left(nullptr)
         , right(nullptr) {}
 };
 
-// 广度优先搜索（BFS）
+// 递归构建二叉树
+TreeNode *buildTree(const std::string &inorder, const std::string &postorder, int in_start, int in_end,
+                    int post_start, int post_end, const std::unordered_map<char, int> &inorder_map) {
+    if (in_start > in_end || post_start > post_end) {
+        return nullptr;
+    }
+
+    char      root_val = postorder[post_end];
+    TreeNode *root     = new TreeNode(root_val);
+
+    int root_index = inorder_map.at(root_val);
+    int left_size  = root_index - in_start;
+
+    root->left  = buildTree(inorder, postorder, in_start, root_index - 1, post_start,
+                            post_start + left_size - 1, inorder_map);
+    root->right = buildTree(inorder, postorder, root_index + 1, in_end, post_start + left_size, post_end - 1,
+                            inorder_map);
+
+    return root;
+}
+
+// 层次遍历
 void bfs(TreeNode *root) {
     if (!root) {
         return;
     }
-    deque<TreeNode *> queue;
-    queue.push_back(root);
+
+    std::queue<TreeNode *> queue;
+    queue.push(root);
+
     while (!queue.empty()) {
-        int         level_size = queue.size();
-        vector<int> temp;
-        for (int i = 0; i < level_size; i++) {
-            TreeNode *current_node = queue.front();
-            queue.pop_front();
-            temp.push_back(current_node->val);
-            if (current_node->left) {
-                queue.push_back(current_node->left);
-            }
-            if (current_node->right) {
-                queue.push_back(current_node->right);
-            }
+        TreeNode *curr = queue.front();
+        queue.pop();
+        std::cout << curr->val;
+
+        if (curr->left) {
+            queue.push(curr->left);
         }
-        for (int i = 0; i < temp.size(); i++) {
-            cout << temp[i];
+        if (curr->right) {
+            queue.push(curr->right);
         }
     }
 }
 
-// 用于构建二叉树
-TreeNode *buildTree(vector<int> &inorder, vector<int> &postorder) {
-    if (inorder.empty() && postorder.empty()) {
-        return nullptr;
+void printLevelOrder(const std::string &inorder, const std::string &postorder) {
+    int                           n = inorder.size();
+    std::unordered_map<char, int> inorder_map;
+    for (int i = 0; i < n; ++i) {
+        inorder_map[inorder[i]] = i;
     }
-    int root_val = postorder.back();
-    postorder.pop_back();
-    TreeNode *root = new TreeNode(root_val);
-    auto      it   = find(inorder.begin(), inorder.end(), root_val);
-    int       idx  = distance(inorder.begin(), it);
 
-    vector<int> left_inorder(inorder.begin(), it);
-    vector<int> right_inorder(it + 1, inorder.end());
-    vector<int> left_postorder(postorder.begin(), postorder.begin() + idx);
-    vector<int> right_postorder(postorder.begin() + idx, postorder.end());
+    TreeNode *root = buildTree(inorder, postorder, 0, n - 1, 0, n - 1, inorder_map);
 
-    root->left  = buildTree(left_inorder, left_postorder);
-    root->right = buildTree(right_inorder, right_postorder);
-    return root;
+    bfs(root);
+}
+
+void testPrintLevelOrder(const std::string &postorder, const std::string &inorder,
+                         const std::string &expected_output) {
+    std::stringstream input;
+    std::stringstream output;
+
+    // 重定向输入输出流
+    std::streambuf *orig_input  = std::cin.rdbuf(input.rdbuf());
+    std::streambuf *orig_output = std::cout.rdbuf(output.rdbuf());
+
+    // 输入测试用例
+    input << postorder << " " << inorder;
+    std::cout << postorder << ", " << inorder << "\n";
+
+    // 执行被测函数
+    printLevelOrder(inorder, postorder);
+
+    // 还原输入输出流
+    std::cin.rdbuf(orig_input);
+    std::cout.rdbuf(orig_output);
+
+    // 使用 assert 断言输出结果是否与预期相符
+    std::cout << output.str() << ", " << expected_output << "\n";
+    assert(output.str() == expected_output);
+}
+
+void test() {
+    {
+        std::string postorder = "HIDJEBFGCA", inorder = "HDIBJEAFCG", expected = "ABCDEFGHIJ";
+        testPrintLevelOrder(postorder, inorder, expected);
+    }
 }
 
 int main() {
-    string a, b;
-    cin >> a >> b;
-    vector<int> postorder(a.begin(), a.end());
-    vector<int> inorder(b.begin(), b.end());
+    test();
 
-    TreeNode *root = buildTree(inorder, postorder);
+    std::string inorder, postorder;
+    std::cin >> postorder >> inorder;
 
-    bfs(root);
+    printLevelOrder(inorder, postorder);
 
     return 0;
 }
