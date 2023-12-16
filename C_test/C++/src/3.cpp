@@ -82,7 +82,6 @@ void testPrintLevelOrder(const std::string &postorder, const std::string &inorde
 
     // 输入测试用例
     input << postorder << " " << inorder;
-    std::cout << postorder << ", " << inorder << "\n";
 
     // 执行被测函数
     printLevelOrder(inorder, postorder);
@@ -92,7 +91,6 @@ void testPrintLevelOrder(const std::string &postorder, const std::string &inorde
     std::cout.rdbuf(orig_output);
 
     // 使用 assert 断言输出结果是否与预期相符
-    std::cout << output.str() << ", " << expected_output << "\n";
     assert(output.str() == expected_output);
 }
 
@@ -101,6 +99,7 @@ void test() {
         std::string postorder = "HIDJEBFGCA", inorder = "HDIBJEAFCG", expected = "ABCDEFGHIJ";
         testPrintLevelOrder(postorder, inorder, expected);
     }
+    std::cout << "test passed\n";
 }
 
 int main() {
